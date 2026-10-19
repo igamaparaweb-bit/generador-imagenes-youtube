@@ -19,14 +19,29 @@
     geminiKey: "",
     openaiKey: "",
     pollinationsKey: "",
-    geminiTextModel: "gemini-2.5-flash",
+    geminiTextModel: "gemini-3.8-flash",
     openaiTextModel: "gpt-4.1-mini",
     pollinationsTextModel: "openai/gpt-5.4-nano",
     style: STYLE_PRESETS["Cine realista"],
     includeChars: true,
   };
 
+  // Modelos que Google ya retiró: si estaban guardados en este navegador, se usa el nuevo.
+  const RETIRED_MODELS = { "gemini-2.5-flash": DEFAULT_SETTINGS.geminiTextModel };
+
   let settings = Storage2.getSettings(DEFAULT_SETTINGS);
+  if (RETIRED_MODELS[settings.geminiTextModel]) settings.geminiTextModel = RETIRED_MODELS[settings.geminiTextModel];
+  // Si la IA cambia de modelo sola (porque Google retiró el anterior), se guarda y se muestra en Ajustes.
+  Object.defineProperty(settings, "onModelChange", {
+    enumerable: false,
+    value: (key, model) => {
+      settings[key] = model;
+      saveSettings();
+      const input = document.getElementById(key);
+      if (input) input.value = model;
+      toast(`Google retiró el modelo anterior; ahora se usa ${model}.`);
+    },
+  });
   let state = emptyState();
 
   function emptyState() {

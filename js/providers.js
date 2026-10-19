@@ -44,8 +44,7 @@
     if (!tp) throw new Error("Para usar la IA pon una clave en ⚙ Ajustes (la de Google Gemini es gratis).");
 
     if (tp === "gemini") {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(s.geminiTextModel)}:generateContent`;
-      const res = await fetchRetry(url, {
+      const call = (model) => fetchRetry(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
         method: "POST",
         headers: { "Content-Type": "application/json", "x-goog-api-key": s.geminiKey },
         body: JSON.stringify({
@@ -53,6 +52,17 @@
           generationConfig: { responseMimeType: "application/json", temperature: 0.4 },
         }),
       });
+      let res;
+      try {
+        res = await call(s.geminiTextModel);
+      } catch (e) {
+        // Google retira modelos y su error dice cuál usar ("...use models/gemini-X..."): se cambia solo.
+        const m = e.status === 404 && /use models\/([\w.\-]+)/i.exec(e.message);
+        if (!m || m[1] === s.geminiTextModel) throw e;
+        res = await call(m[1]);
+        s.geminiTextModel = m[1];
+        if (s.onModelChange) s.onModelChange("geminiTextModel", m[1]);
+      }
       const json = await res.json();
       const parts = (json.candidates && json.candidates[0].content && json.candidates[0].content.parts) || [];
       return parts.map((p) => p.text || "").join("");
