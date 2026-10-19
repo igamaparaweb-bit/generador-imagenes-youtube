@@ -137,6 +137,9 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent); ou
 .placeholder { color: var(--muted); font-size: 12px; position: absolute; }
 .c-name { font-weight: 600; }
 
+.big-field { color: var(--text); font-size: 14px; font-weight: 600; }
+.big-field select { min-width: 190px; }
+
 /* Selector rápido de estilo */
 .style-bar { display: grid; grid-template-columns: minmax(200px, 260px) 1fr; gap: 10px; align-items: end; margin-bottom: 12px; }
 @media (max-width: 600px) { .style-bar { grid-template-columns: 1fr; } }
