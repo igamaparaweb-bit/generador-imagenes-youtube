@@ -3,6 +3,8 @@
   const $ = (sel, root = document) => root.querySelector(sel);
   const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
+  const DEFAULT_SECONDS = 5; // una imagen cada 5 segundos de vídeo
+
   const STYLE_PRESETS = {
     "Cine realista": "Fotograma cinematográfico realista, iluminación dramática, alto detalle, profundidad de campo, colores ricos",
     "Animación 3D": "Estilo animación 3D tipo Pixar, personajes expresivos, iluminación suave, colores vivos",
@@ -44,8 +46,15 @@
   });
   let state = emptyState();
 
+  // Palabras por escena para que cada imagen dure unos `seconds` segundos a la velocidad de la locución.
+  function wordsForSeconds(seconds, wpm) {
+    const words = (seconds * (wpm || 150)) / 60;
+    return { min: Math.max(1, Math.round(words * 0.8)), max: Math.max(1, Math.round(words * 1.2)) };
+  }
+
   function emptyState() {
-    return { script: "", minWords: 3, maxWords: 4, wpm: 150, carry: true, characters: [], chunks: [] };
+    const w = wordsForSeconds(DEFAULT_SECONDS, 150);
+    return { script: "", secondsPerImage: String(DEFAULT_SECONDS), minWords: w.min, maxWords: w.max, wpm: 150, carry: true, characters: [], chunks: [] };
   }
 
   const uid = () => Math.random().toString(36).slice(2, 10);
@@ -214,6 +223,7 @@
 
   function bindScriptValues() {
     $("#script").value = state.script;
+    $("#secondsPerImage").value = state.secondsPerImage || "custom";
     ["minWords", "maxWords", "wpm"].forEach((k) => ($("#" + k).value = state[k]));
     $("#carry").checked = state.carry;
     updateScriptStats();
@@ -226,12 +236,24 @@
       updateScriptStats();
       save();
     });
+    $("#secondsPerImage").addEventListener("change", (e) => {
+      state.secondsPerImage = e.target.value;
+      applySecondsPerImage();
+    });
     ["minWords", "maxWords", "wpm"].forEach((k) =>
       $("#" + k).addEventListener("change", (e) => {
         state[k] = Number(e.target.value) || state[k];
+        if (k === "wpm") {
+          applySecondsPerImage();
+          return;
+        }
+        // Cambiar las palabras a mano pasa a modo "Personalizado".
+        state.secondsPerImage = "custom";
+        $("#secondsPerImage").value = "custom";
+        if (state.maxWords < state.minWords) state.maxWords = state.minWords;
         updateScriptStats();
         save();
-        if (k === "wpm") renderScenes();
+        resplitIfNeeded();
       })
     );
     $("#carry").addEventListener("change", (e) => {
@@ -240,19 +262,39 @@
       reassignCharacters();
     });
 
-    $("#btnSplit").addEventListener("click", splitScript);
+    $("#btnSplit").addEventListener("click", () => splitScript());
     $("#btnDetect").addEventListener("click", (e) => withBusy(e.currentTarget, detectCharacters));
     $("#btnDetect2").addEventListener("click", (e) => withBusy(e.currentTarget, detectCharacters));
+  }
+
+  function applySecondsPerImage() {
+    if (state.secondsPerImage && state.secondsPerImage !== "custom") {
+      const w = wordsForSeconds(Number(state.secondsPerImage), state.wpm);
+      state.minWords = w.min;
+      state.maxWords = w.max;
+      $("#minWords").value = w.min;
+      $("#maxWords").value = w.max;
+    }
+    updateScriptStats();
+    save();
+    renderScenes();
+    resplitIfNeeded();
+  }
+
+  // Si ya había escenas, se vuelven a crear con el nuevo tamaño.
+  function resplitIfNeeded() {
+    if (state.chunks.length && state.script.trim()) splitScript({ stay: true });
   }
 
   function updateScriptStats() {
     const n = state.script.trim() ? state.script.trim().split(/\s+/).length : 0;
     const avg = (state.minWords + state.maxWords) / 2;
     const mins = n / (state.wpm || 150);
-    $("#scriptStats").textContent = `${n} palabras · ~${Math.ceil(n / avg)} escenas · ~${mins.toFixed(1)} min de vídeo`;
+    const secs = (avg * 60) / (state.wpm || 150);
+    $("#scriptStats").textContent = `${n} palabras · ~${Math.ceil(n / avg)} imágenes (una cada ~${secs.toFixed(1)} s) · ~${mins.toFixed(1)} min de vídeo`;
   }
 
-  function splitScript() {
+  function splitScript(opts = {}) {
     if (!state.script.trim()) return toast("Primero pega el guion.", true);
     if (state.chunks.some((c) => c.scene) && !confirm("Ya hay escenas con descripciones. ¿Volver a dividir el guion? Se perderán.")) return;
     const chunks = Splitter.splitScript(state.script, state.minWords, state.maxWords).map((c) => ({
@@ -266,7 +308,7 @@
     assignCharacters();
     save();
     renderScenes();
-    showTab("escenas");
+    if (!opts.stay) showTab("escenas");
     toast(`Guion dividido en ${chunks.length} escenas.`);
   }
 
@@ -549,6 +591,20 @@
         delete c.image;
         delete c.error;
       });
+      // Proyectos anteriores (3-4 palabras, una imagen cada ~1,5 s): pasan a una imagen cada 5 s.
+      if (!saved.secondsPerImage) {
+        state.secondsPerImage = String(DEFAULT_SECONDS);
+        const w = wordsForSeconds(DEFAULT_SECONDS, state.wpm);
+        state.minWords = w.min;
+        state.maxWords = w.max;
+        if (state.chunks.length && state.script.trim()) {
+          state.chunks = Splitter.splitScript(state.script, w.min, w.max).map((c) => ({
+            id: uid(), text: c.text, sentence: c.sentence, words: c.words, scene: "",
+          }));
+          assignCharacters();
+        }
+        save();
+      }
     }
 
     $$(".tab").forEach((t) => t.addEventListener("click", () => showTab(t.dataset.tab)));
