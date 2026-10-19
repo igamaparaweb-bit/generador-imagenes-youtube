@@ -122,7 +122,7 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent); ou
 /* Personajes */
 .char-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 14px; }
 .char {
-  display: grid; grid-template-columns: 130px 1fr; gap: 12px;
+  display: grid; grid-template-columns: 1fr; gap: 12px;
   background: var(--panel2); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px;
 }
 .char-body { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
@@ -136,6 +136,15 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent); ou
 .char-img img[src] + .placeholder, .scene-img img[src] + .placeholder { display: none; }
 .placeholder { color: var(--muted); font-size: 12px; position: absolute; }
 .c-name { font-weight: 600; }
+
+/* Lista de prompts */
+.scene-list { display: grid; gap: 10px; }
+.scene-list .scene { padding: 12px 14px; gap: 8px; }
+.scene-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.scene-head .chips { margin-left: auto; }
+.s-final { display: flex; gap: 8px; align-items: flex-start; background: var(--panel2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; }
+.s-prompt { margin: 0; flex: 1; font-size: 13px; color: var(--muted); user-select: all; overflow-wrap: anywhere; }
+.c-del { flex: none; }
 
 /* Escenas */
 .scene-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 14px; }
@@ -185,7 +194,6 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent); ou
 @media (max-width: 600px) {
   .topbar { padding: 10px 16px; }
   .sticky-tools { position: static; }
-  .char { grid-template-columns: 1fr; }
-  .char-img { aspect-ratio: 1; max-height: 260px; }
-  .char-grid, .scene-grid { grid-template-columns: 1fr; }
+  .char-grid { grid-template-columns: 1fr; }
+  .scene-head .chips { margin-left: 0; }
 }
