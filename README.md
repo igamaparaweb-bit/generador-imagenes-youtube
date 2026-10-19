@@ -2,7 +2,7 @@
 
 Pega el guion de tu vídeo y la app:
 
-1. **Lo divide en escenas de 3 a 4 palabras** (configurable), respetando frases y comas. Cada escena será una imagen.
+1. **Lo divide en escenas**: eliges **una imagen cada X segundos** (5 s por defecto) y la app calcula cuántas palabras van en cada escena según la velocidad de la locución, respetando frases y comas. Cada escena será una imagen.
 2. **Saca los personajes** (con IA o a mano) y les da una **descripción visual fija**.
 3. **Escribe un prompt para cada escena** con el estilo elegido y la descripción de los personajes que aparecen, para que salgan siempre iguales.
 4. Te deja **copiar todos los prompts** (uno por línea) o descargarlos en `.txt` / `.csv` (con tiempos).

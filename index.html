@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Guion a Prompts</title>
   <meta name="description" content="Convierte el guion de tu vídeo de YouTube en personajes fijos y un prompt de imagen cada 3-4 palabras, listos para Google Flow." />
-  <link rel="stylesheet" href="css/styles.css?v=4" />
+  <link rel="stylesheet" href="css/styles.css?v=5" />
 </head>
 <body>
   <header class="topbar">
@@ -31,11 +31,24 @@
         <h2>Pega tu guion</h2>
         <textarea id="script" rows="14" placeholder="Pega aquí el guion completo del vídeo..."></textarea>
         <div class="row wrap">
-          <label>Mín. palabras <input type="number" id="minWords" min="1" max="20" value="3" /></label>
-          <label>Máx. palabras <input type="number" id="maxWords" min="1" max="30" value="4" /></label>
+          <label class="big-field">⏱ Una imagen cada
+            <select id="secondsPerImage">
+              <option value="2">2 segundos</option>
+              <option value="3">3 segundos</option>
+              <option value="4">4 segundos</option>
+              <option value="5">5 segundos</option>
+              <option value="6">6 segundos</option>
+              <option value="8">8 segundos</option>
+              <option value="10">10 segundos</option>
+              <option value="15">15 segundos</option>
+              <option value="custom">Personalizado (palabras)</option>
+            </select>
+          </label>
           <label title="Velocidad de la locución para calcular los tiempos">Palabras/min <input type="number" id="wpm" min="60" max="300" value="150" /></label>
-          <label class="check"><input type="checkbox" id="carry" checked /> Mantener personajes cuando se habla de ellos sin nombrarlos</label>
+          <label>Mín. palabras <input type="number" id="minWords" min="1" max="80" value="10" /></label>
+          <label>Máx. palabras <input type="number" id="maxWords" min="1" max="100" value="15" /></label>
         </div>
+        <label class="check"><input type="checkbox" id="carry" checked /> Mantener personajes cuando se habla de ellos sin nombrarlos</label>
         <p class="muted" id="scriptStats">0 palabras</p>
         <div class="row wrap">
           <button class="btn" id="btnDetect">🔍 Detectar personajes con IA</button>
@@ -162,9 +175,9 @@
   </template>
 
   <!-- ?v= obliga al navegador a cargar la versión nueva tras cada actualización -->
-  <script src="js/storage.js?v=4"></script>
-  <script src="js/splitter.js?v=4"></script>
-  <script src="js/providers.js?v=4"></script>
-  <script src="js/app.js?v=4"></script>
+  <script src="js/storage.js?v=5"></script>
+  <script src="js/splitter.js?v=5"></script>
+  <script src="js/providers.js?v=5"></script>
+  <script src="js/app.js?v=5"></script>
 </body>
 </html>
