@@ -1,0 +1,5 @@
+.env
+*.zip
+proyecto-video.json
+.DS_Store
+Thumbs.db
