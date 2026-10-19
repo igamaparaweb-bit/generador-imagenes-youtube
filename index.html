@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Guion a Prompts</title>
   <meta name="description" content="Convierte el guion de tu vídeo de YouTube en personajes fijos y un prompt de imagen cada 3-4 palabras, listos para Google Flow." />
-  <link rel="stylesheet" href="css/styles.css?v=3" />
+  <link rel="stylesheet" href="css/styles.css?v=4" />
 </head>
 <body>
   <header class="topbar">
@@ -63,6 +63,12 @@
     <!-- PROMPTS -->
     <section class="panel" id="tab-escenas">
       <div class="card sticky-tools">
+        <div class="style-bar">
+          <label>🎨 Estilo de las imágenes
+            <select id="styleQuick"></select>
+          </label>
+          <input id="styleQuickText" placeholder="O escribe tu propio estilo (ej: anime estilo Studio Ghibli, colores pastel)" />
+        </div>
         <div class="row between wrap">
           <div class="row wrap">
             <button class="btn" id="btnPrompts">✨ Mejorar escenas con IA</button>
@@ -156,9 +162,9 @@
   </template>
 
   <!-- ?v= obliga al navegador a cargar la versión nueva tras cada actualización -->
-  <script src="js/storage.js?v=3"></script>
-  <script src="js/splitter.js?v=3"></script>
-  <script src="js/providers.js?v=3"></script>
-  <script src="js/app.js?v=3"></script>
+  <script src="js/storage.js?v=4"></script>
+  <script src="js/splitter.js?v=4"></script>
+  <script src="js/providers.js?v=4"></script>
+  <script src="js/app.js?v=4"></script>
 </body>
 </html>
