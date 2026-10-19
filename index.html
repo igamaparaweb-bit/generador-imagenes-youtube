@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Guion a Imágenes</title>
-  <meta name="description" content="Genera imágenes con IA para tus vídeos de YouTube: una imagen cada 3-5 palabras del guion y personajes consistentes." />
+  <title>Guion a Prompts</title>
+  <meta name="description" content="Convierte el guion de tu vídeo de YouTube en personajes fijos y un prompt de imagen cada 3-4 palabras, listos para Google Flow." />
   <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
@@ -12,14 +12,14 @@
     <div class="brand">
       <span class="logo">▶</span>
       <div>
-        <h1>Guion a Imágenes</h1>
-        <p>Una imagen cada pocas palabras, con personajes consistentes</p>
+        <h1>Guion a Prompts</h1>
+        <p>Personajes fijos y un prompt cada pocas palabras, listos para Flow</p>
       </div>
     </div>
     <nav class="tabs" role="tablist">
       <button class="tab active" data-tab="guion">1 · Guion</button>
       <button class="tab" data-tab="personajes">2 · Personajes <span id="charCount" class="badge">0</span></button>
-      <button class="tab" data-tab="escenas">3 · Escenas <span id="sceneCount" class="badge">0</span></button>
+      <button class="tab" data-tab="escenas">3 · Prompts <span id="sceneCount" class="badge">0</span></button>
       <button class="tab" data-tab="ajustes">⚙ Ajustes</button>
     </nav>
   </header>
@@ -32,7 +32,7 @@
         <textarea id="script" rows="14" placeholder="Pega aquí el guion completo del vídeo..."></textarea>
         <div class="row wrap">
           <label>Mín. palabras <input type="number" id="minWords" min="1" max="20" value="3" /></label>
-          <label>Máx. palabras <input type="number" id="maxWords" min="1" max="30" value="5" /></label>
+          <label>Máx. palabras <input type="number" id="maxWords" min="1" max="30" value="4" /></label>
           <label title="Velocidad de la locución para calcular los tiempos">Palabras/min <input type="number" id="wpm" min="60" max="300" value="150" /></label>
           <label class="check"><input type="checkbox" id="carry" checked /> Mantener personajes cuando se habla de ellos sin nombrarlos</label>
         </div>
@@ -52,84 +52,71 @@
           <div class="row wrap">
             <button class="btn" id="btnDetect2">🔍 Detectar con IA</button>
             <button class="btn" id="btnAddChar">＋ Añadir personaje</button>
-            <button class="btn primary" id="btnAllRefs">🎨 Crear referencias que falten</button>
+            <button class="btn" id="btnCopyChars">📋 Copiar fichas</button>
           </div>
         </div>
-        <p class="muted">Cada personaje tiene una descripción fija y una imagen de referencia. La app los busca por nombre (y alias) en cada fragmento del guion y envía su referencia a la IA para que siempre se vean iguales. Puedes subir tu propia imagen.</p>
+        <p class="muted">Cada personaje tiene una descripción fija. Se añade a cada prompt en el que aparece (por su nombre o sus alias) para que siempre salga igual. Usa "Copiar fichas" para crearlos en Google Flow (Caracteres).</p>
         <div id="characters" class="char-grid"></div>
       </div>
     </section>
 
-    <!-- ESCENAS -->
+    <!-- PROMPTS -->
     <section class="panel" id="tab-escenas">
       <div class="card sticky-tools">
         <div class="row between wrap">
           <div class="row wrap">
-            <button class="btn" id="btnPrompts">✨ Crear prompts de escena con IA</button>
-            <button class="btn primary" id="btnGenAll">▶ Generar imágenes</button>
-            <button class="btn danger hidden" id="btnStop">■ Detener</button>
+            <button class="btn" id="btnPrompts">✨ Mejorar escenas con IA</button>
+            <label class="check"><input type="checkbox" id="includeChars" checked /> Incluir descripción de personajes en cada prompt</label>
           </div>
           <div class="row wrap">
-            <button class="btn" id="btnZip">⬇ Descargar ZIP</button>
+            <button class="btn primary" id="btnCopyAll">📋 Copiar todos los prompts</button>
+            <button class="btn" id="btnTxt">⬇ .txt</button>
+            <button class="btn" id="btnCsv">⬇ .csv</button>
           </div>
         </div>
-        <div class="progress"><div id="progressBar"></div></div>
         <p class="muted" id="progressText">Divide el guion para crear las escenas.</p>
       </div>
-      <div id="scenes" class="scene-grid"></div>
+      <div id="scenes" class="scene-list"></div>
     </section>
 
     <!-- AJUSTES -->
     <section class="panel" id="tab-ajustes">
       <div class="card">
-        <h2>Proveedor de IA</h2>
+        <h2>Estilo visual</h2>
+        <div class="row wrap" id="stylePresets"></div>
+        <textarea id="style" rows="3"></textarea>
+        <p class="muted">Se pone al principio de todos los prompts para que el vídeo tenga un aspecto uniforme.</p>
+      </div>
+      <div class="card">
+        <h2>IA de texto (opcional)</h2>
+        <p class="muted">Solo hace falta para <b>detectar personajes</b> y <b>mejorar escenas</b> automáticamente. Sin clave, puedes añadir los personajes a mano y los prompts se crean igual. La IA solo escribe texto: <b>no genera imágenes</b>.</p>
         <div class="grid2">
-          <label>Proveedor de imágenes
+          <label>Proveedor
             <select id="provider">
-              <option value="gemini">Google Gemini (recomendado: usa referencias de personajes)</option>
-              <option value="openai">OpenAI gpt-image (usa referencias de personajes)</option>
-              <option value="pollinations">Pollinations (clave gratuita, muchos modelos, consistencia básica)</option>
+              <option value="gemini">Google Gemini (recomendado, gratis)</option>
+              <option value="openai">OpenAI</option>
+              <option value="pollinations">Pollinations</option>
             </select>
           </label>
-          <label>Formato
-            <select id="aspect">
-              <option value="16:9">16:9 · YouTube horizontal</option>
-              <option value="9:16">9:16 · Shorts</option>
-              <option value="1:1">1:1 · Cuadrado</option>
-              <option value="4:3">4:3</option>
-            </select>
-          </label>
-          <label>Clave API de Gemini <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">(conseguir)</a>
+          <label>Clave API de Gemini <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">(conseguir gratis)</a>
             <input type="password" id="geminiKey" placeholder="AIza..." autocomplete="off" />
           </label>
           <label>Clave API de OpenAI <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener">(conseguir)</a>
             <input type="password" id="openaiKey" placeholder="sk-..." autocomplete="off" />
           </label>
-          <label>Clave API de Pollinations <a href="https://enter.pollinations.ai" target="_blank" rel="noopener">(conseguir gratis)</a>
+          <label>Clave API de Pollinations <a href="https://enter.pollinations.ai" target="_blank" rel="noopener">(conseguir)</a>
             <input type="password" id="pollinationsKey" placeholder="sk_..." autocomplete="off" />
           </label>
-          <label>Modelo de imagen Gemini <input id="geminiImageModel" /></label>
           <label>Modelo de texto Gemini <input id="geminiTextModel" /></label>
-          <label>Modelo de imagen OpenAI <input id="openaiImageModel" /></label>
           <label>Modelo de texto OpenAI <input id="openaiTextModel" /></label>
-          <label>Modelo de imagen Pollinations <input id="pollinationsModel" /></label>
           <label>Modelo de texto Pollinations <input id="pollinationsTextModel" /></label>
-          <label>Imágenes en paralelo <input type="number" id="concurrency" min="1" max="6" /></label>
-          <label>Semilla base (Pollinations) <input type="number" id="seed" /></label>
-          <label class="check"><input type="checkbox" id="autoRefs" /> Crear la referencia de cada personaje antes de generar escenas</label>
         </div>
-        <p class="muted">🔒 Las claves se guardan solo en este navegador y se envían directamente al proveedor. Nunca se suben a GitHub.</p>
-      </div>
-      <div class="card">
-        <h2>Estilo visual</h2>
-        <div class="row wrap" id="stylePresets"></div>
-        <textarea id="style" rows="3"></textarea>
-        <p class="muted">Este estilo se añade a todas las imágenes para que el vídeo tenga un aspecto uniforme.</p>
+        <p class="muted">🔒 Las claves se guardan solo en este navegador y se envían directamente al proveedor.</p>
       </div>
       <div class="card">
         <h2>Proyecto</h2>
         <div class="row wrap">
-          <button class="btn" id="btnExport">💾 Exportar proyecto (.json)</button>
+          <button class="btn" id="btnExport">💾 Exportar proyecto (.json, para la extensión de Flow)</button>
           <label class="btn">📂 Importar proyecto <input type="file" id="importFile" accept=".json" hidden /></label>
           <button class="btn danger" id="btnReset">🗑 Nuevo proyecto</button>
         </div>
@@ -141,49 +128,33 @@
 
   <template id="tplChar">
     <div class="char">
-      <div class="char-img">
-        <img alt="" />
-        <span class="placeholder">Sin referencia</span>
-        <div class="spinner hidden"></div>
-      </div>
       <div class="char-body">
-        <input class="c-name" placeholder="Nombre" />
+        <div class="row">
+          <input class="c-name" placeholder="Nombre" />
+          <button class="btn small danger c-del" title="Eliminar personaje">✕</button>
+        </div>
         <input class="c-aliases" placeholder="Alias separados por comas (ej: el abuelo, Don Pepe)" />
         <textarea class="c-desc" rows="4" placeholder="Descripción visual fija: edad, pelo, ropa, colores..."></textarea>
-        <div class="row wrap">
-          <button class="btn small c-gen">🎨 Generar referencia</button>
-          <label class="btn small">⬆ Subir imagen <input type="file" class="c-upload" accept="image/*" hidden /></label>
-          <button class="btn small danger c-del">Eliminar</button>
-        </div>
       </div>
     </div>
   </template>
 
   <template id="tplScene">
     <div class="scene">
-      <div class="scene-img">
-        <img alt="" loading="lazy" />
-        <span class="placeholder">Pendiente</span>
-        <div class="spinner hidden"></div>
-      </div>
-      <div class="scene-body">
-        <div class="row between">
-          <strong class="s-num"></strong>
-          <span class="muted s-time"></span>
-        </div>
-        <p class="s-text"></p>
+      <div class="scene-head">
+        <strong class="s-num"></strong>
+        <span class="muted s-time"></span>
         <div class="chips s-chars"></div>
-        <textarea class="s-scene" rows="3" placeholder="Descripción de la escena (opcional; si está vacía se usa el texto del guion)"></textarea>
-        <p class="error s-error hidden"></p>
-        <div class="row wrap">
-          <button class="btn small s-gen">↻ Generar</button>
-          <button class="btn small s-dl">⬇</button>
-        </div>
+      </div>
+      <p class="s-text"></p>
+      <textarea class="s-scene" rows="2" placeholder="Descripción de la escena (opcional). Si está vacía se usa el texto del guion."></textarea>
+      <div class="s-final">
+        <p class="s-prompt"></p>
+        <button class="btn small s-copy" title="Copiar este prompt">📋</button>
       </div>
     </div>
   </template>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <script src="js/storage.js"></script>
   <script src="js/splitter.js"></script>
   <script src="js/providers.js"></script>
