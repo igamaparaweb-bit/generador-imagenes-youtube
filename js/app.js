@@ -155,7 +155,10 @@
       el.addEventListener("change", () => {
         settings[key] = el.value.trim();
         saveSettings();
-        if (key === "style") renderScenes();
+        if (key === "style") {
+          syncStyleInputs();
+          renderScenes();
+        }
       });
     });
     const inc = $("#includeChars");
@@ -172,14 +175,39 @@
       b.className = "btn small";
       b.textContent = name;
       b.addEventListener("click", () => {
-        $("#style").value = text;
-        settings.style = text;
-        saveSettings();
-        renderScenes();
+        setStyle(text);
         toast(`Estilo: ${name}`);
       });
       presets.appendChild(b);
     });
+
+    // Selector rápido en la pestaña de Prompts (mismo estilo que en Ajustes).
+    const quick = $("#styleQuick");
+    quick.innerHTML = Object.keys(STYLE_PRESETS).map((n) => `<option value="${n}">${n}</option>`).join("") +
+      `<option value="__custom">Personalizado…</option><option value="__none">Sin estilo</option>`;
+    quick.addEventListener("change", () => {
+      if (quick.value === "__custom") {
+        $("#styleQuickText").focus();
+        return;
+      }
+      setStyle(quick.value === "__none" ? "" : STYLE_PRESETS[quick.value]);
+    });
+    $("#styleQuickText").addEventListener("input", (e) => setStyle(e.target.value, true));
+    syncStyleInputs();
+  }
+
+  function setStyle(text, fromQuickText) {
+    settings.style = text;
+    saveSettings();
+    syncStyleInputs(fromQuickText);
+    renderScenes();
+  }
+
+  function syncStyleInputs(fromQuickText) {
+    $("#style").value = settings.style;
+    const preset = Object.keys(STYLE_PRESETS).find((n) => STYLE_PRESETS[n] === settings.style);
+    $("#styleQuick").value = preset || (settings.style ? "__custom" : "__none");
+    if (!fromQuickText) $("#styleQuickText").value = preset || !settings.style ? "" : settings.style;
   }
 
   /* ---------------- Guion ---------------- */
